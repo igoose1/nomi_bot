@@ -45,7 +45,7 @@ def transaction(env: lmdb.Environment, write=False):
 # Init lmdb environment with as many dbs as many chats use the bot.
 db_env = lmdb.Environment(
     path='db',
-    map_async=True, max_dbs=80, meminit=False,
+    map_async=True, max_dbs=80, meminit=False
 )
 
 write_queue: "Queue[Tuple[str, str, str]]" = queue.Queue()
@@ -106,6 +106,8 @@ class BotActions:
 
     @run_async
     def all_nomis(update: telegram.Update, context: CallbackContext) -> None:
+        if update.message is None:
+            update.message = update.edited_message
         nomis_to_user_ids = list_nomis(str(update.message.chat.id))
         message_text = ' '.join(
             [BotActions.md_link(n, ui) for n, ui in nomis_to_user_ids]
@@ -156,6 +158,8 @@ class BotActions:
 
     @run_async
     def look_for_nomis(update: telegram.Update, context: CallbackContext) -> None:
+        if update.message is None:
+            update.message = update.edited_message
         kwtree = KeywordTree(case_insensitive=True)
         for nomi, _ in list_nomis(str(update.message.chat.id)):
             kwtree.add(nomi)
@@ -180,27 +184,30 @@ def main() -> None:
     handlers = (
         CommandHandler(
             'list',
-            BotActions.b_list_nomis
+            BotActions.b_list_nomis,
+            filters=Filters.update.message
         ),
         CommandHandler(
             'set',
             BotActions.set_nomi,
             pass_args=True,
-            filters=(Filters.regex(r'^/set(\s+\S{3,30})+$') & Filters.reply)
+            filters=(Filters.regex(r'^/set(\s+\S{3,30})+$') & Filters.reply &\
+                Filters.update.message)
         ),
         CommandHandler(
             'unset',
             BotActions.unset_nomi,
             pass_args=True,
-            filters=Filters.regex(r'^/unset(\s+\S{3,30})+$')
+            filters=(Filters.regex(r'^/unset(\s+\S{3,30})+$') &\
+                Filters.update.message)
         ),
         MessageHandler(
             Filters.regex(r'(^|\s)@all($|\s)'),
-            BotActions.all_nomis
+            BotActions.all_nomis,
         ),
         MessageHandler(
-            Filters.regex('.+'),
-            BotActions.look_for_nomis
+            Filters.text,
+            BotActions.look_for_nomis,
         )
     )
 
