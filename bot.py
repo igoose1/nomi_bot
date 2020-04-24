@@ -25,6 +25,7 @@ from ahocorapy.keywordtree import KeywordTree
 import telegram
 from telegram.ext import (Updater, MessageHandler, CommandHandler, Filters,
     CallbackContext)
+from telegram.ext.dispatcher import run_async
 
 
 def transaction(env: lmdb.Environment, write=False):
@@ -103,6 +104,7 @@ class BotActions:
         return f'[{nomi}](tg://user?id={user_id})'
 
 
+    @run_async
     def all_nomis(update: telegram.Update, context: CallbackContext) -> None:
         nomis_to_user_ids = list_nomis(str(update.message.chat.id))
         message_text = ' '.join(
@@ -111,6 +113,7 @@ class BotActions:
         update.message.reply_markdown(message_text)
 
 
+    @run_async
     def b_list_nomis(update: telegram.Update, context: CallbackContext) -> None:
         user_id_to_nomis: Dict[str, List[str]] = dict()
         for nomi, user_id in list_nomis(str(update.message.chat.id)):
@@ -129,7 +132,7 @@ class BotActions:
         update.message.reply_markdown(message_text)
 
 
-
+    @run_async
     def set_nomi(update: telegram.Update, context: CallbackContext) -> None:
         nomis = update.message.text.split()[1:]
         user_id = str(update.message.reply_to_message.from_user.id)
@@ -140,6 +143,7 @@ class BotActions:
         update.message.reply_markdown(message_text)
 
 
+    @run_async
     def unset_nomi(update: telegram.Update, context: CallbackContext) -> None:
         nomis = update.message.text.split()[1:]
         chat_id = str(update.message.chat.id)
@@ -150,6 +154,7 @@ class BotActions:
         update.message.reply_markdown(message_text)
 
 
+    @run_async
     def look_for_nomis(update: telegram.Update, context: CallbackContext) -> None:
         kwtree = KeywordTree(case_insensitive=True)
         for nomi, _ in list_nomis(str(update.message.chat.id)):
