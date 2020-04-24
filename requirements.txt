@@ -1,0 +1,4 @@
+python-telegram-bot==12.6.*
+lmdb>=0.98
+ahocorapy==1.5.*
+ujson==2.0.*
