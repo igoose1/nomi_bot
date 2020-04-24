@@ -194,7 +194,7 @@ def main() -> None:
             BotActions.all_nomis
         ),
         MessageHandler(
-            Filters.text,
+            Filters.regex('.+'),
             BotActions.look_for_nomis
         )
     )
@@ -202,14 +202,16 @@ def main() -> None:
     for handler in handlers:
         updater.dispatcher.add_handler(handler)
 
-    updater.start_polling()
-    writing_thread = start_writing_circle()
     try:
+        writing_thread = start_writing_circle()
+        updater.start_polling()
         while True: pass
     except KeyboardInterrupt:
+        logging.info('wait now')
         write_queue.put(None)
         updater.stop()
         writing_thread.join()
+        logging.info('bye')
 
 
 if __name__ == '__main__':
