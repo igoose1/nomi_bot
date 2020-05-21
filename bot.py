@@ -18,6 +18,7 @@ from typing import List, Tuple, Set, Dict
 import threading
 import os
 import logging
+import time
 
 import lmdb
 import queue
@@ -217,7 +218,7 @@ def main() -> None:
     try:
         writing_thread = start_writing_circle()
         updater.start_polling()
-        while True: pass
+        while True: time.sleep(2)
     except KeyboardInterrupt:
         logging.info('wait now')
         write_queue.put(None)
