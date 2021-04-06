@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright 2020 Oskar Sharipov <oskar.sharipov[at]tuta.io>
+# Copyright 2020 -- 2021 Oskar Sharipov <oskarsh at riseup dot net>
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -49,7 +49,7 @@ db_env = lmdb.Environment(
     map_async=True, max_dbs=80, meminit=False
 )
 
-write_queue: "Queue[Tuple[str, str, str]]" = queue.Queue()
+write_queue: "queue.Queue[Tuple[str, str, str]]" = queue.Queue()
 
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -61,7 +61,7 @@ def __write_nomi(txn: lmdb.Transaction, nomi: str, user_id: str) -> None:
     txn.put(nomi.encode(), user_id.encode())
 
 
-def __writing_circle() -> None:
+def __writing_cycle() -> None:
     while True:
         args = write_queue.get()
         if args is None:
@@ -70,8 +70,8 @@ def __writing_circle() -> None:
         __write_nomi(*args)
 
 
-def start_writing_circle() -> threading.Thread:
-    thread = threading.Thread(target=__writing_circle)
+def start_writing_cycle() -> threading.Thread:
+    thread = threading.Thread(target=__writing_cycle)
     thread.start()
     return thread
 
@@ -178,7 +178,6 @@ class BotActions:
         update.message.reply_markdown(message_text)
 
 
-
 def main() -> None:
     token = os.getenv('TOKEN')
     updater = Updater(token, use_context=True)
@@ -216,7 +215,7 @@ def main() -> None:
         updater.dispatcher.add_handler(handler)
 
     try:
-        writing_thread = start_writing_circle()
+        writing_thread = start_writing_cycle()
         updater.start_polling()
         while True: time.sleep(2)
     except KeyboardInterrupt:
