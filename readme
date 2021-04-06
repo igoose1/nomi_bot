@@ -1,0 +1,12 @@
+Pinging friends in Telegram chat by their name!
+
+Use `/set Bob` with a reply or `/unset Bob` to set or unset an alias (aka
+nomi), send `/list` to list all nomis and write `@all` to ping everyone.
+
+Launch by:
+
+	% python -m pip install -r requirements.txt
+	% export TOKEN="1234:abcdef"
+	% python bot.py
+
+LMDB is used and a file with a database will be created.
